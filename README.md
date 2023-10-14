@@ -34,7 +34,7 @@ AWS_LOCAL_ENDPOINT=http://localhost:4566
 ## Installation db locally
 
 ```bash
-$ npm run start docker:up
+$ npm run docker:up
 ```
 
 ## Running the app
