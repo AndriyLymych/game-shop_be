@@ -6,8 +6,7 @@
 /coverage
 
 # env
-.development.env
-.production.env
+.env
 
 # IDEs and editors
 /.idea
