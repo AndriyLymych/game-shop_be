@@ -9,7 +9,7 @@ services:
     environment:
       PG_DATA: /var/lib/postgresql/data
     ports:
-      - 5432:5432 
+      - 5433:5432 
     volumes:
       - pgdata:/var/lib/postgresql/data
     restart: always
@@ -31,7 +31,8 @@ services:
       - 'volume-localstack:/var/lib/localstack'
       - '/var/run/docker.sock:/var/run/docker.sock'
     networks:
-    - aws_app_localstack_network    
+    - aws_app_localstack_network
+    restart: always    
 
 networks:
     aws_app_localstack_network:
