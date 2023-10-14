@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { APP_FILTER } from '@nestjs/core';
 
 import { UsersModule } from './users/users.module';
 import { FileModule } from './files/files.module';
+import { ErrorExeptionFilter } from './filters/errorExeption.filter';
 
 @Module({
   imports: [
@@ -24,6 +26,11 @@ import { FileModule } from './files/files.module';
     FileModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_FILTER,
+      useClass: ErrorExeptionFilter,
+    },
+  ],
 })
 export class AppModule {}
