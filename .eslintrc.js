@@ -21,7 +21,7 @@ module.exports = {
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
-    '@typescript-eslint/no-unused-vars': 'warn',
+    '@typescript-eslint/no-unused-vars': 'error',
     '@typescript-eslint/semi': ['error', 'always'],
     '@typescript-eslint/quotes': ['error', 'single'],
     'no-console': 'error',
@@ -29,7 +29,7 @@ module.exports = {
       'error',
       {
         groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
-        'newlines-between': 'always', // Додавання порожньої строчки між групами імпортів
+        'newlines-between': 'always',
       },
     ],
   },
