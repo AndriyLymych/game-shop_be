@@ -6,6 +6,7 @@ import { APP_FILTER } from '@nestjs/core';
 import { UsersModule } from './users/users.module';
 import { FileModule } from './files/files.module';
 import { ErrorExeptionFilter } from './filters/errorExeption.filter';
+import { LoggerModule } from './logger/logger.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ErrorExeptionFilter } from './filters/errorExeption.filter';
     }),
     UsersModule,
     FileModule,
+    LoggerModule,
   ],
   controllers: [],
   providers: [

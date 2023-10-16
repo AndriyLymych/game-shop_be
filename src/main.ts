@@ -3,6 +3,7 @@ import { RootAdminHelper } from 'src/helpers/createRootAdmin.helper';
 
 import { AppModule } from './app.module';
 import { FilesService } from './files/files.service';
+import { LoggerService } from './logger/logger.service';
 import { UsersService } from './users/users.service';
 
 const start = async () => {
@@ -10,10 +11,11 @@ const start = async () => {
 
   const app = await NestFactory.create(AppModule);
 
-  const createRootAdmin = new RootAdminHelper(app.get(UsersService));
-
+  const createRootAdmin = new RootAdminHelper(
+    app.get(UsersService),
+    await app.resolve(LoggerService),
+  );
   await createRootAdmin.create();
-
   await app.get(FilesService).createBucket();
 
   await app.listen(PORT, async () => {
