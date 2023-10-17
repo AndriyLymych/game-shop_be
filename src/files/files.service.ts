@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { BadRequestException } from '@nestjs/common';
 import * as uuid from 'uuid';
 
+import { LoggerService } from '../logger/logger.service';
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const AWS = require('aws-sdk');
 
@@ -9,7 +11,7 @@ const AWS = require('aws-sdk');
 export class FilesService {
   private s3: Record<string, any>;
 
-  constructor() {
+  constructor(private logger: LoggerService) {
     this.s3 = new AWS.S3({
       accessKeyId: process.env.AWS_ACCESS_KEY_ID,
       secretAccessKey: process.env.AWS_SECRET_KEY,
@@ -29,8 +31,30 @@ export class FilesService {
     try {
       const { Buckets } = await this.s3.listBuckets().promise();
 
+      if (Buckets[0]) {
+        this.logger.info({
+          message: 'Getting S3 Bucket...',
+          context: {
+            service: FilesService.name,
+            method: this.getBucket.name,
+          },
+          payload: {
+            bucket: Buckets[0].Name,
+          },
+        });
+      }
+
       return Buckets[0];
-    } catch {
+    } catch (e) {
+      this.logger.error({
+        message: e.message,
+        trace: e.stack,
+        context: {
+          service: FilesService.name,
+          method: this.getBucket.name,
+        },
+      });
+
       return false;
     }
   }
@@ -43,12 +67,32 @@ export class FilesService {
         return;
       }
 
-      await this.s3
+      const { Location } = await this.s3
         .createBucket({
           Bucket: process.env.AWS_BUCKET_NAME,
         })
         .promise();
+
+      this.logger.info({
+        message: 'S3 Bucket is successfully created',
+        context: {
+          service: FilesService.name,
+          method: this.createBucket.name,
+        },
+        payload: {
+          bucket: Location,
+        },
+      });
     } catch (e) {
+      this.logger.error({
+        message: e.message,
+        trace: e.stack,
+        context: {
+          service: FilesService.name,
+          method: this.createBucket.name,
+        },
+      });
+
       throw new BadRequestException(`Failed to create s3 bucket: ${e.message}`);
     }
   }
@@ -69,8 +113,28 @@ export class FilesService {
         })
         .promise();
 
+      this.logger.info({
+        message: 'File is successfully uploaded to s3',
+        context: {
+          service: FilesService.name,
+          method: this.uploadFile.name,
+        },
+        payload: {
+          bucket: Location,
+        },
+      });
+
       return Location;
     } catch (e) {
+      this.logger.error({
+        message: e.message,
+        trace: e.stack,
+        context: {
+          service: FilesService.name,
+          method: this.uploadFile.name,
+        },
+      });
+
       throw new BadRequestException(`Failed to add file to s3: ${e.message}`);
     }
   }
