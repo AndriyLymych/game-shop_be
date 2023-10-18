@@ -5,7 +5,10 @@ import { CreateUserDto } from '../users/dto/createUser.dto';
 
 import { UserRolesEnum } from './roles';
 
-export const rootAdmin: CreateUserDto & { isActive: boolean } = {
+export const rootAdmin: CreateUserDto & {
+  isActive: boolean;
+  role: UserRolesEnum;
+} = {
   firstName: 'Admin',
   lastName: 'Admin',
   email: process.env.ROOT_ADMIN_EMAIL,

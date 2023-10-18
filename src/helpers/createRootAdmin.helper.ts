@@ -13,9 +13,9 @@ export class RootAdminHelper {
 
   async create(): Promise<User | void> {
     try {
-      const isAdminAlreadyAdded = await this.usersService.getByEmail(
-        rootAdmin.email,
-      );
+      const isAdminAlreadyAdded = await this.usersService.getByParams({
+        email: rootAdmin.email,
+      });
 
       if (isAdminAlreadyAdded) {
         this.logger.info({
