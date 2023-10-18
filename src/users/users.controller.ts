@@ -7,8 +7,9 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { FilesEnum } from 'src/constants/files';
-import { UserRolesEnum } from 'src/constants/roles';
+
+import { FilesEnum } from '../constants/files';
+import { UserRolesEnum } from '../constants/roles';
 
 import { CreateUserDto } from './dto/createUser.dto';
 import { UsersService } from './users.service';
@@ -17,7 +18,7 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
-  @Post()
+  @Post('/')
   @UseInterceptors(FileInterceptor('avatar'))
   create(
     @Body() userDto: CreateUserDto,
@@ -33,9 +34,9 @@ export class UsersController {
         .build({ fileIsRequired: false }),
     )
     avatar: Express.Multer.File,
-  ) {
+  ): void {
     const user = { ...userDto, role: UserRolesEnum.USER };
 
-    return this.usersService.create(user, avatar);
+    this.usersService.create(user, avatar);
   }
 }

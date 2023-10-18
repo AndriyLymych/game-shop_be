@@ -1,6 +1,12 @@
-import { Module } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { UserAlreadyExistsMiddleware } from '../middlewares/userAlreadyExists.middleware';
 import { LoggerModule } from '../logger/logger.module';
 import { FileModule } from '../files/files.module';
 
@@ -14,4 +20,11 @@ import { User } from './users.entity';
   controllers: [UsersController],
   exports: [UsersService],
 })
-export class UsersModule {}
+export class UsersModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(UserAlreadyExistsMiddleware).forRoutes({
+      path: 'users',
+      method: RequestMethod.POST,
+    });
+  }
+}

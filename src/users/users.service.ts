@@ -30,9 +30,9 @@ export class UsersService {
     }
   }
 
-  async getByEmail(email: string): Promise<User | null> {
+  async getByParams(params: Partial<User>): Promise<User | null> {
     return this.usersRepository.findOne({
-      where: { email },
+      where: params,
     });
   }
 }
