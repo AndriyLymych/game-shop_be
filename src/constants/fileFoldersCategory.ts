@@ -1,4 +1,4 @@
-export enum PHOTO_CATEGORY {
+export enum FILE_CATEGORY {
   USERS = 'users',
   GAMES = 'games',
 }

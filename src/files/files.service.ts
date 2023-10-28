@@ -2,16 +2,25 @@ import { Injectable } from '@nestjs/common';
 import { BadRequestException } from '@nestjs/common';
 import * as uuid from 'uuid';
 
+import { FILE_CATEGORY } from '../constants/fileFoldersCategory';
+import { UsersService } from '../users/users.service';
 import { LoggerService } from '../logger/logger.service';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const AWS = require('aws-sdk');
 
+export interface UploadFile {
+  link: string;
+}
+
 @Injectable()
 export class FilesService {
   private s3: Record<string, any>;
 
-  constructor(private logger: LoggerService) {
+  constructor(
+    private logger: LoggerService,
+    private usersService: UsersService,
+  ) {
     this.s3 = new AWS.S3({
       accessKeyId: process.env.AWS_ACCESS_KEY_ID,
       secretAccessKey: process.env.AWS_SECRET_KEY,
@@ -97,10 +106,10 @@ export class FilesService {
     }
   }
 
-  async uploadFile(
+  async upload(
     file: Express.Multer.File,
-    category: string,
-  ): Promise<string> {
+    category: FILE_CATEGORY,
+  ): Promise<UploadFile> {
     try {
       const key = `${category}/${uuid.v4()}_${file.originalname}`;
 
@@ -117,25 +126,64 @@ export class FilesService {
         message: 'File is successfully uploaded to s3',
         context: {
           service: FilesService.name,
-          method: this.uploadFile.name,
+          method: this.upload.name,
         },
         payload: {
-          bucket: Location,
+          fileLink: Location,
         },
       });
 
-      return Location;
+      return { link: Location };
     } catch (e) {
-      this.logger.error({
-        message: e.message,
-        trace: e.stack,
+      throw new BadRequestException(`Failed to add file to s3: ${e.message}`);
+    }
+  }
+
+  async remove(link: string): Promise<void> {
+    try {
+      await this.s3
+        .deleteObject({
+          Bucket: process.env.AWS_BUCKET_NAME,
+          Key: link,
+        })
+        .promise();
+
+      this.logger.info({
+        message: 'File is successfully removed from s3',
         context: {
           service: FilesService.name,
-          method: this.uploadFile.name,
+          method: this.remove.name,
+        },
+        payload: {
+          link,
         },
       });
 
+      return;
+    } catch (e) {
       throw new BadRequestException(`Failed to add file to s3: ${e.message}`);
+    }
+  }
+
+  async updateAvatar(
+    file: Express.Multer.File,
+    category: FILE_CATEGORY,
+    userId: string,
+  ): Promise<UploadFile> {
+    const { link } = await this.upload(file, category);
+
+    try {
+      const { avatar } = await this.usersService.updateById(userId, {
+        avatar: link,
+      });
+
+      return { link: avatar };
+    } catch (e) {
+      await this.remove(link);
+
+      throw new BadRequestException(
+        `Failed to update avatar to user ${userId}: ${e.message}`,
+      );
     }
   }
 }

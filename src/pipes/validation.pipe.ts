@@ -3,7 +3,6 @@ import {
   BadRequestException,
   Injectable,
   PipeTransform,
-  Type,
 } from '@nestjs/common';
 import { validate } from 'class-validator';
 import { plainToClass } from 'class-transformer';
@@ -11,17 +10,11 @@ import { plainToClass } from 'class-transformer';
 @Injectable()
 export class ValidationPipe implements PipeTransform {
   async transform(value: any, metadata: ArgumentMetadata): Promise<any> {
-    let metatype: Type<any>;
-
-    if (metadata.type === 'body') {
-      metatype = metadata?.metatype;
-    }
-
-    if (!metatype) {
+    if (metadata?.type === 'custom') {
       return value;
     }
 
-    const objectToValidate = plainToClass(metatype, value);
+    const objectToValidate = plainToClass(metadata?.metatype, value);
 
     const errors = await validate(objectToValidate);
 

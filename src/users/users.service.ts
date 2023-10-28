@@ -1,10 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import cryptography from '../helpers/cryptography.helper';
-import { PHOTO_CATEGORY } from '../constants/photoFoldersCategory';
-import { FilesService } from '../files/files.service';
 
 import { CreateUserDto } from './dto/createUser.dto';
 import { User } from './users.entity';
@@ -13,26 +11,30 @@ import { User } from './users.entity';
 export class UsersService {
   constructor(
     @InjectRepository(User) private usersRepository: Repository<User>,
-    private filesService: FilesService,
   ) {}
 
-  async create(
-    createUserDto: CreateUserDto,
-    avatar?: Express.Multer.File,
-  ): Promise<User | void> {
+  async create(createUserDto: CreateUserDto): Promise<Partial<User>> {
     const password = await cryptography.hashPassword(createUserDto.password);
     const user = { ...createUserDto, password };
 
-    await this.usersRepository.save(user);
+    const { id } = await this.usersRepository.save(user);
 
-    if (avatar) {
-      await this.filesService.uploadFile(avatar, PHOTO_CATEGORY.GAMES);
-    }
+    return { id };
   }
 
   async getByParams(params: Partial<User>): Promise<User | null> {
     return this.usersRepository.findOne({
       where: params,
     });
+  }
+
+  async updateById(id: string, updateData: Partial<User>): Promise<User> {
+    const { affected } = await this.usersRepository.update(id, updateData);
+
+    if (affected <= 0) {
+      throw new BadRequestException(`User with id ${id} not udpated`);
+    }
+
+    return this.getByParams({ id: +id });
   }
 }
