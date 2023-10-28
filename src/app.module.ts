@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { APP_FILTER } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 
 import { UsersModule } from './users/users.module';
-import { FileModule } from './files/files.module';
+import { FilesModule } from './files/files.module';
 import { ErrorExeptionFilter } from './filters/errorExeption.filter';
 import { LoggerModule } from './logger/logger.module';
+import { GlobalResponseInterceptor } from './interceptors/globalResponse.interceptor';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import { LoggerModule } from './logger/logger.module';
       synchronize: process.env.NODE_ENV === 'development',
     }),
     UsersModule,
-    FileModule,
+    FilesModule,
     LoggerModule,
   ],
   controllers: [],
@@ -32,6 +33,10 @@ import { LoggerModule } from './logger/logger.module';
     {
       provide: APP_FILTER,
       useClass: ErrorExeptionFilter,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: GlobalResponseInterceptor,
     },
   ],
 })

@@ -1,7 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 import { LoggerService } from 'src/logger/logger.service';
 
-import { User } from '../users/users.entity';
 import { rootAdmin } from '../constants/rootAdmin';
 import { UsersService } from '../users/users.service';
 
@@ -11,7 +10,7 @@ export class RootAdminHelper {
     private logger: LoggerService,
   ) {}
 
-  async create(): Promise<User | void> {
+  async create(): Promise<void> {
     try {
       const isAdminAlreadyAdded = await this.usersService.getByParams({
         email: rootAdmin.email,
@@ -29,7 +28,7 @@ export class RootAdminHelper {
         return;
       }
 
-      const admin = await this.usersService.create(rootAdmin);
+      await this.usersService.create(rootAdmin);
 
       this.logger.info({
         message: 'Root admin succussfully created',
@@ -38,8 +37,6 @@ export class RootAdminHelper {
           method: this.create.name,
         },
       });
-
-      return admin;
     } catch (e) {
       this.logger.error({
         message: e.message,

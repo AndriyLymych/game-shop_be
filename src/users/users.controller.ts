@@ -1,42 +1,23 @@
-import {
-  Body,
-  Controller,
-  ParseFilePipeBuilder,
-  Post,
-  UploadedFile,
-  UseInterceptors,
-} from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { Body, Controller, HttpStatus, Post } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import { FilesEnum } from '../constants/files';
 import { UserRolesEnum } from '../constants/roles';
 
 import { CreateUserDto } from './dto/createUser.dto';
+import { User } from './users.entity';
 import { UsersService } from './users.service';
 
+@ApiTags('Users')
 @Controller('users')
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
-  @Post('/')
-  @UseInterceptors(FileInterceptor('avatar'))
-  create(
-    @Body() userDto: CreateUserDto,
-    @UploadedFile(
-      new ParseFilePipeBuilder()
-        .addMaxSizeValidator({
-          maxSize: FilesEnum.MAX_SIZE,
-          message: `Unable to upload user avatar with size more then ${
-            FilesEnum.MAX_SIZE / (1024 * 1024)
-          } mb`,
-        })
-        .addFileTypeValidator({ fileType: /(jpeg|gif|png)/ })
-        .build({ fileIsRequired: false }),
-    )
-    avatar: Express.Multer.File,
-  ): void {
+  @ApiOperation({ summary: 'Create user' })
+  @ApiResponse({ status: HttpStatus.CREATED, type: User })
+  @Post()
+  create(@Body() userDto: CreateUserDto): Promise<Partial<User>> {
     const user = { ...userDto, role: UserRolesEnum.USER };
 
-    this.usersService.create(user, avatar);
+    return this.usersService.create(user);
   }
 }
