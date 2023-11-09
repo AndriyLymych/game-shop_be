@@ -8,13 +8,20 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { UserAlreadyExistsMiddleware } from '../middlewares/userAlreadyExists.middleware';
 import { LoggerModule } from '../logger/logger.module';
+import { TokenModule } from '../token/token.module';
+import { EmailModule } from '../email/email.module';
 
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { User } from './users.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), LoggerModule],
+  imports: [
+    TypeOrmModule.forFeature([User]),
+    LoggerModule,
+    TokenModule,
+    EmailModule,
+  ],
   providers: [UsersService],
   controllers: [UsersController],
   exports: [UsersService],

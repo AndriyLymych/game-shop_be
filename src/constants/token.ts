@@ -1,0 +1,3 @@
+export enum TokenEnum {
+  CONFIRM_USER_REGISTRATION = 'CONFIRM_USER_REGISTRATION',
+}
