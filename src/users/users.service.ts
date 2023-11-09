@@ -1,8 +1,13 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { EmailTemplates } from 'src/constants/templates';
 
+import { TokenEnum } from '../constants/token';
+import { EmailService } from '../email/email.service';
+import { TokenService } from '../token/token.service';
 import cryptography from '../helpers/cryptography.helper';
+import { LoggerService } from '../logger/logger.service';
 
 import { CreateUserDto } from './dto/createUser.dto';
 import { User } from './users.entity';
@@ -11,13 +16,42 @@ import { User } from './users.entity';
 export class UsersService {
   constructor(
     @InjectRepository(User) private usersRepository: Repository<User>,
+    private emailService: EmailService,
+    private tokenService: TokenService,
+    private logger: LoggerService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<Partial<User>> {
     const password = await cryptography.hashPassword(createUserDto.password);
     const user = { ...createUserDto, password };
 
-    const { id } = await this.usersRepository.save(user);
+    const { id, email } = await this.usersRepository.save(user);
+
+    const { accessToken } = await this.tokenService.generate(
+      TokenEnum.CONFIRM_USER_REGISTRATION,
+      { userId: id },
+    );
+
+    try {
+      await this.emailService.sendEmail({
+        email,
+        subject: EmailTemplates[TokenEnum.CONFIRM_USER_REGISTRATION].subject,
+        template:
+          EmailTemplates[TokenEnum.CONFIRM_USER_REGISTRATION].templateFileName,
+        context: {
+          token: accessToken,
+        },
+      });
+    } catch (e) {
+      this.logger.error({
+        message: `Failed to send registration mail: ${e}`,
+        trace: e.stack,
+        context: { service: UsersService.name, method: this.create.name },
+        payload: {
+          userId: id,
+        },
+      });
+    }
 
     return { id };
   }
