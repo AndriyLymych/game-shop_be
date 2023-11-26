@@ -30,10 +30,13 @@ jobs:
           COVERAGE_THRESHOLD=80
           COVERAGE=$(cat coverage/lcov-report/index.html | grep -oP 'Statements.+?(\d+)%' | grep -oP '\d+')
           
+          COVERAGE=$(echo "$COVERAGE" | tr -d '\n')
+
           echo "Coverage is: $COVERAGE%"
           echo "Threshold is: $COVERAGE_THRESHOLD"
 
-          if [ "$COVERAGE" -lt "$COVERAGE_THRESHOLD" ]; then
+          if ! [[ "$COVERAGE" =~ ^[0-9]+$ ]] || [ "$COVERAGE" -lt "$COVERAGE_THRESHOLD" ]; then
             echo "Error: Test coverage is below the threshold ($COVERAGE%)."
             exit 1
-          fi      
+          fi
+    
