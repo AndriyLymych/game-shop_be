@@ -7,7 +7,7 @@ import * as jwt from 'jsonwebtoken';
 
 import { TokenEnum } from '../constants/token';
 
-interface Token {
+export interface Token {
   accessToken: string;
   refreshToken?: string;
 }

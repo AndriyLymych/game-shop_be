@@ -1,12 +1,12 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { EmailTemplates } from 'src/constants/templates';
 
+import { EmailTemplates } from '../constants/templates';
 import { TokenEnum } from '../constants/token';
 import { EmailService } from '../email/email.service';
 import { TokenService } from '../token/token.service';
-import cryptography from '../helpers/cryptography.helper';
+import { CryptographyService } from '../cryptography/cryptography.service';
 import { LoggerService } from '../logger/logger.service';
 
 import { CreateUserDto } from './dto/createUser.dto';
@@ -18,11 +18,14 @@ export class UsersService {
     @InjectRepository(User) private usersRepository: Repository<User>,
     private emailService: EmailService,
     private tokenService: TokenService,
+    private cryptographyService: CryptographyService,
     private logger: LoggerService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<Partial<User>> {
-    const password = await cryptography.hashPassword(createUserDto.password);
+    const password = await this.cryptographyService.hashPassword(
+      createUserDto.password,
+    );
     const user = { ...createUserDto, password };
 
     const { id, email } = await this.usersRepository.save(user);
@@ -62,7 +65,7 @@ export class UsersService {
     });
   }
 
-  async updateById(id: string, updateData: Partial<User>): Promise<User> {
+  async updateById(id: number, updateData: Partial<User>): Promise<User> {
     const { affected } = await this.usersRepository.update(id, updateData);
 
     if (affected <= 0) {

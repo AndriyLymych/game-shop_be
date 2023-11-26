@@ -161,14 +161,16 @@ export class FilesService {
 
       return;
     } catch (e) {
-      throw new BadRequestException(`Failed to add file to s3: ${e.message}`);
+      throw new BadRequestException(
+        `Failed to remove file from s3: ${e.message}`,
+      );
     }
   }
 
   async updateAvatar(
     file: Express.Multer.File,
     category: FILE_CATEGORY,
-    userId: string,
+    userId: number,
   ): Promise<UploadFile> {
     const { link } = await this.upload(file, category);
 

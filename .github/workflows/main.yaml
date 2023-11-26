@@ -21,7 +21,16 @@ jobs:
         run: npm ci
       - name: Build project
         run: npm run build
+      - name: Run lint
+        run: npm run lint 
       - name: Run unit test:cov
         run: npm run test:cov
-      - name: Run lint
-        run: npm run lint    
+      - name: Check coverage
+        run: |
+          COVERAGE_THRESHOLD=80
+          COVERAGE=$(cat coverage/lcov-report/index.html | grep -oP 'Statements.+?(\d+)%' | grep -oP '\d+')
+          
+          if [ "$COVERAGE" -lt "$COVERAGE_THRESHOLD" ]; then
+            echo "Error: Test coverage is below the threshold ($COVERAGE%)."
+            exit 1
+          fi        
