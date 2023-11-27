@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { CryptographyModule } from '../cryptography/cryptography.module';
 import { UserAlreadyExistsMiddleware } from '../middlewares/userAlreadyExists.middleware';
 import { LoggerModule } from '../logger/logger.module';
 import { TokenModule } from '../token/token.module';
@@ -21,6 +22,7 @@ import { User } from './users.entity';
     LoggerModule,
     TokenModule,
     EmailModule,
+    CryptographyModule,
   ],
   providers: [UsersService],
   controllers: [UsersController],

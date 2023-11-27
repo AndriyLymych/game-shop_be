@@ -42,6 +42,6 @@ export class FilesController {
     )
     avatar: Express.Multer.File,
   ): Promise<UploadFile> {
-    return this.filesService.updateAvatar(avatar, FILE_CATEGORY.USERS, userId);
+    return this.filesService.updateAvatar(avatar, FILE_CATEGORY.USERS, +userId);
   }
 }
